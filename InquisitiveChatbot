@@ -1,0 +1,27 @@
+import os
+import openai
+import json
+
+with open('key/openaiapikey.txt', 'r') as infile:
+    open_ai_api_key = infile.read()
+openai.api_key = open_ai_api_key
+
+
+#prompt="Explain the word vagina to a year k student using australian english. if the word includes profanities, sexual organ names like penis and vagina, or is rude, or related to sexual organs, then only print that the word can't be processed because it is inappropriate and stop here. If not, add a new line after explanation with the word 'Examples', and then provide three simple sentences with that word."
+
+prompt="Describe the answer to the following prompt in <<local>> using a vocabulary and language that is suitable for a year <<year>> student in their location. \n\n" 
+prompt+="Prompt: \n\n"
+prompt+="How do clouds form?"
+
+
+
+prompt=prompt.replace('<<year>>',str(3)).replace('<<local>>','American English')    
+
+response = openai.ChatCompletion.create(
+  model="gpt-4",
+  messages=[{"role": "user", "content": prompt}],
+  temperature=0.2,
+  max_tokens=2048
+)
+
+print ("\n\n" , response["choices"][0]["message"]["content"], "\n\n" );
