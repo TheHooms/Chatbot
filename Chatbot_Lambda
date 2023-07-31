@@ -1,0 +1,55 @@
+import os
+import openai
+import json
+
+
+def lambda_handler(event, context):
+    
+    event_body = ''
+    if('body' in event):
+        event_body = json.loads(event['body'])
+    else:
+        event_body = event
+    
+    userPrompt = event_body['prompt']
+    year = event_body['year']
+    local = event_body['local']
+    temperature = event_body['temperature']
+    
+    enc = " -> ".join([userPrompt, year, local,temperature])
+    
+    print('Arguments:' , enc)
+
+    
+    prompt="Describe the answer to the following prompt in <<local>> using a vocabulary and language that is suitable for a year <<year>> student. \n\n" 
+    prompt+="Prompt: \n\n"
+    
+    prompt=prompt.replace('<<year>>',year).replace('<<local>>',local)   
+    
+    prompt+=userPrompt
+    
+    
+    openai.api_key = os.environ['openai_api_key']
+
+    response = openai.ChatCompletion.create(
+      model="gpt-4",
+      messages=[{"role": "user", "content": prompt}],
+      temperature=float(temperature),
+      max_tokens=2048
+    )
+
+    result = response["choices"][0]["message"]["content"]
+    print ("\n\n" , result , "\n\n" );
+    
+    
+    
+    return {
+        'statusCode': 200,
+         'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Credentials': 'true', 
+                'Access-Control-Allow-Headers': 'Origin, X-Requested-With, Content-Type, Accept, Authorization'
+                },
+        'body': json.dumps(result)
+    }
